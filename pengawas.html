@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1e2a4a">
+<title>Pengawas FORLAS</title>
+<style>
+  :root{
+    --navy:#1e2a4a; --bg:#eef0f8; --card:#fff; --ink:#1b1f2a; --muted:#5b6475; --line:#e3e6f0;
+    --ok:#1f8f4e; --blue:#2457c5; --bad:#d93025; --amber:#b26a00;
+    --ok-bg:#e6f5ec; --blue-bg:#e8effd; --bad-bg:#fde9e7; --amber-bg:#fff2dc;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  [hidden]{display:none !important}
+  button{font:inherit}
+
+  /* ===== Login ===== */
+  .center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login{background:var(--card);width:100%;max-width:380px;border-radius:16px;padding:26px 22px;
+    box-shadow:0 6px 24px rgba(30,42,74,.12)}
+  .login h1{margin:0 0 4px;font-size:20px}
+  .login p{margin:0 0 16px;color:var(--muted);font-size:14px}
+  .login input{width:100%;font-size:22px;letter-spacing:.3em;text-align:center;padding:12px;
+    border:2px solid #c9cfe0;border-radius:12px}
+  .login input:focus{outline:none;border-color:var(--navy)}
+  .login .err{color:var(--bad);font-size:13px;margin:8px 0 0;min-height:18px}
+  .btn{appearance:none;border:0;border-radius:10px;font-weight:600;padding:11px 16px;cursor:pointer;
+    background:var(--navy);color:#fff}
+  .btn.block{width:100%;margin-top:10px;font-size:16px;padding:13px}
+  .btn.ghost{background:#e3e6f0;color:var(--ink)}
+  .btn:disabled{opacity:.5;cursor:wait}
+
+  /* ===== Aplikasi ===== */
+  main{max-width:1200px;margin:0 auto;padding:14px 14px 40px}
+  .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .top h1{margin:0;font-size:20px}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .sub.err{color:var(--bad)}
+  .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .auto{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+  .stat{background:var(--card);border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(30,42,74,.08)}
+  .stat .n{font-size:28px;font-weight:800;line-height:1.1}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .stat.blue .n{color:var(--blue)} .stat.red .n{color:var(--bad)}
+  .stat.green .n{color:var(--ok)} .stat.amber .n{color:var(--amber)}
+
+  .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{appearance:none;border:1px solid #c9cfe0;background:#fff;border-radius:999px;padding:6px 12px;
+    font-size:13px;cursor:pointer;color:var(--ink)}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .tools input[type=search], .tools select{border:1px solid #c9cfe0;border-radius:10px;padding:7px 10px;
+    font-size:14px;background:#fff;color:var(--ink)}
+  .tools .sp{flex:1}
+
+  .tablewrap{background:var(--card);border-radius:12px;overflow:auto;box-shadow:0 1px 4px rgba(30,42,74,.08)}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
+  th{position:sticky;top:0;background:#f6f7fc;text-align:left;font-size:12px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  tr.away td{background:#fff5f4}
+  tr.warn td:first-child{box-shadow:inset 4px 0 0 var(--bad)}
+  .nis{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:6px;padding:2px 6px;margin-left:6px}
+  .tag.dup{background:var(--amber-bg);color:var(--amber)}
+  .pill{display:inline-block;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .pill.mengerjakan{background:var(--blue-bg);color:var(--blue)}
+  .pill.keluar{background:var(--bad-bg);color:var(--bad)}
+  .pill.selesai{background:var(--ok-bg);color:var(--ok)}
+  .since{display:block;font-size:12px;color:var(--bad);margin-top:3px}
+  .pel{display:inline-block;min-width:30px;text-align:center;font-weight:800;border-radius:8px;padding:2px 8px}
+  .pel.ok{background:var(--ok-bg);color:var(--ok)}
+  .pel.mid{background:var(--amber-bg);color:var(--amber)}
+  .pel.hi{background:var(--bad-bg);color:var(--bad)}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .muted{color:var(--muted)}
+  .reason{max-width:320px}
+  #empty{text-align:center;color:var(--muted);padding:26px}
+</style>
+</head>
+<body>
+
+<!-- ============ MASUK ============ -->
+<section id="login" class="center">
+  <form class="login" id="loginForm" autocomplete="off">
+    <h1>Pengawas FORLAS</h1>
+    <p>Masukkan kode akses pengawas.</p>
+    <input id="code" type="password" maxlength="6" autocomplete="off" autocapitalize="off"
+           spellcheck="false" placeholder="••••••" aria-label="Kode akses">
+    <div id="loginErr" class="err"></div>
+    <button class="btn block" id="btnLogin" type="submit">Masuk</button>
+  </form>
+</section>
+
+<!-- ============ PEMANTAUAN ============ -->
+<main id="app" hidden>
+  <div class="top">
+    <div>
+      <h1>Pengawas FORLAS</h1>
+      <div id="status" class="sub"></div>
+    </div>
+    <div class="actions">
+      <label class="auto"><input type="checkbox" id="auto" checked> Otomatis</label>
+      <button class="btn" id="btnRefresh" type="button">Segarkan</button>
+      <button class="btn ghost" id="btnLogout" type="button">Keluar</button>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="tools">
+    <div class="chips" id="chips">
+      <button class="chip on" data-f="semua" type="button">Semua</button>
+      <button class="chip" data-f="mengerjakan" type="button">Mengerjakan</button>
+      <button class="chip" data-f="keluar" type="button">Keluar halaman</button>
+      <button class="chip" data-f="selesai" type="button">Selesai</button>
+    </div>
+    <span class="sp"></span>
+    <input id="q" type="search" inputmode="numeric" placeholder="Cari NIS" aria-label="Cari NIS" style="width:110px">
+    <select id="sort" aria-label="Urutkan">
+      <option value="pel">Pelanggaran terbanyak</option>
+      <option value="status">Status (keluar dulu)</option>
+      <option value="aktif">Aktivitas terbaru</option>
+      <option value="mulai">Mulai terbaru</option>
+      <option value="nis">NIS</option>
+    </select>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>NIS</th><th>Status</th><th>Pelanggaran</th><th>Mulai</th>
+          <th>Durasi</th><th>Total keluar</th><th>Kejadian terakhir</th><th>Alasan terakhir</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" hidden>Belum ada data.</div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= KONFIGURASI ================= */
+  var CONFIG = {
+    // URL web app GAS yang sama dengan GAS_URL di index.html (berakhiran /exec)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxBQ-cQ_uXSdMUL2crLeFm7RMLKf_8Vp4o8EGO6NgoO-jv2wU1efPk8RryF9fD9yvUxhw/exec',
+    REFRESH_MS: 15000,   // segarkan data otomatis tiap sekian milidetik
+    WARN_AT: 3,          // baris diberi tanda merah bila pelanggaran >= angka ini
+    SS_KEY: 'forlas_pengawas_code'
+  };
+
+  var configured = /^https:\/\/script\.google\.com\/.+\/exec$/.test(CONFIG.GAS_URL);
+  var $ = function (id) { return document.getElementById(id); };
+
+  var st = {
+    code: '', rows: [], offset: 0, updatedAt: 0,
+    filter: 'semua', q: '', sort: 'pel',
+    busy: false, err: '', loggedIn: false
+  };
+
+  /* ================= FORMAT ================= */
+  function now() { return Date.now() + st.offset; }
+  function clock(t) {
+    if (!t) return '\u2013';
+    return new Date(t).toLocaleTimeString('en-GB', {
+      timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+  function dur(ms) {
+    if (ms < 0) ms = 0;
+    var s = Math.round(ms / 1000);
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), d = s % 60;
+    if (h) return h + ' j ' + (m < 10 ? '0' : '') + m + ' mnt';
+    if (m) return m + ' mnt ' + (d < 10 ? '0' : '') + d + ' dtk';
+    return d + ' dtk';
+  }
+  function ago(ms) {
+    if (ms < 5000) return 'baru saja';
+    return dur(ms) + ' lalu';
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  /* ================= AMBIL DATA ================= */
+  function load(fromLogin) {
+    if (st.busy) return;
+    if (!configured) { loginError('GAS_URL di pengawas.html belum diisi.'); return; }
+    st.busy = true;
+    $('btnRefresh').disabled = true;
+
+    fetch(CONFIG.GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'monitor', code: st.code }),
+      redirect: 'follow'
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.ok) {
+          st.rows = res.rows || [];
+          st.offset = (res.now || Date.now()) - Date.now();
+          st.updatedAt = Date.now();
+          st.err = '';
+          st.loggedIn = true;
+          try { sessionStorage.setItem(CONFIG.SS_KEY, st.code); } catch (e) {}
+          showApp();
+          render();
+        } else if (res && res.error === 'kode salah') {
+          logout('Kode salah.');
+        } else {
+          throw new Error((res && res.error) || 'galat');
+        }
+      })
+      .catch(function (e) {
+        if (fromLogin && !st.loggedIn) {
+          loginError('Gagal terhubung ke server. Periksa sinyal lalu coba lagi.');
+        } else {
+          st.err = 'Gagal memuat data, mencoba lagi\u2026';
+          renderStatus();
+        }
+      })
+      .then(function () {
+        st.busy = false;
+        $('btnRefresh').disabled = false;
+        $('btnLogin').disabled = false;
+      });
+  }
+
+  /* ================= MASUK / KELUAR ================= */
+  function loginError(msg) { $('loginErr').textContent = msg; $('btnLogin').disabled = false; }
+  function showApp() { $('login').hidden = true; $('app').hidden = false; }
+  function logout(msg) {
+    st.loggedIn = false; st.code = ''; st.rows = [];
+    try { sessionStorage.removeItem(CONFIG.SS_KEY); } catch (e) {}
+    $('app').hidden = true; $('login').hidden = false;
+    $('code').value = '';
+    loginError(msg || '');
+  }
+
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('code').value.trim();
+    if (v.length !== 6) { loginError('Kode terdiri dari 6 karakter.'); return; }
+    $('loginErr').textContent = '';
+    $('btnLogin').disabled = true;
+    st.code = v;
+    load(true);
+  });
+  $('btnLogout').addEventListener('click', function () { logout(''); });
+  $('btnRefresh').addEventListener('click', function () { load(false); });
+
+  /* ================= TAMPILAN ================= */
+  function renderStatus() {
+    var s = $('status');
+    if (st.err) { s.textContent = st.err; s.className = 'sub err'; return; }
+    s.className = 'sub';
+    s.textContent = 'Diperbarui ' + clock(now()) +
+      ($('auto').checked ? ' \u00b7 otomatis tiap ' + Math.round(CONFIG.REFRESH_MS / 1000) + ' dtk' : ' \u00b7 otomatis mati');
+  }
+
+  function sorter(a, b) {
+    switch (st.sort) {
+      case 'nis':    return a.nis < b.nis ? -1 : a.nis > b.nis ? 1 : 0;
+      case 'mulai':  return b.startT - a.startT;
+      case 'aktif':  return b.lastT - a.lastT;
+      case 'status':
+        var o = { keluar: 0, mengerjakan: 1, selesai: 2 };
+        return (o[a.status] - o[b.status]) || (b.pel - a.pel);
+      default:       return (b.pel - a.pel) || (b.lastT - a.lastT);
+    }
+  }
+
+  function render() {
+    renderStatus();
+    var rows = st.rows;
+
+    var c = { all: rows.length, mengerjakan: 0, keluar: 0, selesai: 0, pel: 0 };
+    rows.forEach(function (r) { c[r.status] = (c[r.status] || 0) + 1; c.pel += r.pel; });
+
+    var cards = $('cards');
+    cards.textContent = '';
+    [
+      ['Siswa tercatat', c.all, ''],
+      ['Mengerjakan', c.mengerjakan, 'blue'],
+      ['Keluar halaman', c.keluar, c.keluar ? 'red' : ''],
+      ['Selesai', c.selesai, 'green'],
+      ['Total pelanggaran', c.pel, c.pel ? 'amber' : '']
+    ].forEach(function (x) {
+      var d = el('div', 'stat ' + x[2]);
+      d.appendChild(el('div', 'n', String(x[1])));
+      d.appendChild(el('div', 'l', x[0]));
+      cards.appendChild(d);
+    });
+
+    var list = rows.filter(function (r) {
+      return (st.filter === 'semua' || r.status === st.filter) &&
+             (!st.q || r.nis.indexOf(st.q) !== -1);
+    }).sort(sorter);
+
+    var tb = $('tbody');
+    tb.textContent = '';
+    list.forEach(function (r) {
+      var tr = el('tr', (r.status === 'keluar' ? 'away ' : '') + (r.pel >= CONFIG.WARN_AT ? 'warn' : ''));
+
+      var tdNis = el('td');
+      tdNis.appendChild(el('span', 'nis', r.nis));
+      if (r.sesi > 1) {
+        var tg = el('span', 'tag dup', r.sesi + ' sesi');
+        tg.title = 'NIS ini memulai ujian lebih dari satu kali';
+        tdNis.appendChild(tg);
+      }
+      tr.appendChild(tdNis);
+
+      var tdSt = el('td');
+      tdSt.appendChild(el('span', 'pill ' + r.status,
+        r.status === 'keluar' ? 'Keluar halaman' : r.status === 'selesai' ? 'Selesai' : 'Mengerjakan'));
+      if (r.status === 'keluar' && r.awaySince) {
+        tdSt.appendChild(el('span', 'since', 'sejak ' + clock(r.awaySince)));
+      }
+      tr.appendChild(tdSt);
+
+      var tdP = el('td');
+      var cls = r.pel === 0 ? 'ok' : (r.pel >= CONFIG.WARN_AT ? 'hi' : 'mid');
+      tdP.appendChild(el('span', 'pel ' + cls, String(r.pel)));
+      tr.appendChild(tdP);
+
+      tr.appendChild(el('td', 'num', clock(r.startT)));
+      tr.appendChild(el('td', 'num',
+        r.status === 'selesai' ? dur(r.endT - r.startT) : dur(now() - r.startT) + ' (berjalan)'));
+      tr.appendChild(el('td', 'num' + (r.awaySec ? '' : ' muted'), r.awaySec ? dur(r.awaySec * 1000) : '\u2013'));
+      tr.appendChild(el('td', 'num', ago(now() - r.lastT)));
+      tr.appendChild(el('td', 'reason' + (r.reason ? '' : ' muted'), r.reason || '\u2013'));
+      tb.appendChild(tr);
+    });
+
+    $('empty').hidden = list.length > 0;
+    $('empty').textContent = rows.length ? 'Tidak ada data yang cocok dengan filter.' : 'Belum ada data.';
+  }
+
+  /* ================= FILTER ================= */
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    st.filter = b.getAttribute('data-f');
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (x) {
+      x.classList.toggle('on', x === b);
+    });
+    render();
+  });
+  $('q').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+    st.q = this.value;
+    render();
+  });
+  $('sort').addEventListener('change', function () { st.sort = this.value; render(); });
+  $('auto').addEventListener('change', renderStatus);
+
+  /* ================= SEGARKAN OTOMATIS ================= */
+  setInterval(function () {
+    if (st.loggedIn && $('auto').checked && !document.hidden) load(false);
+  }, CONFIG.REFRESH_MS);
+
+  // Perbarui durasi dan "x lalu" tanpa menghubungi server
+  setInterval(function () { if (st.loggedIn && st.rows.length) render(); }, 5000);
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && st.loggedIn) load(false);
+  });
+
+  /* ================= AWAL ================= */
+  (function init() {
+    var saved = '';
+    try { saved = sessionStorage.getItem(CONFIG.SS_KEY) || ''; } catch (e) {}
+    if (saved) { st.code = saved; load(true); }
+    $('code').focus();
+  })();
+})();
+</script>
+</body>
+</html>
