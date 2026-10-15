@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1e2a4a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>FORLAS - SMK Negeri Bansari</title>
+<style>
+  :root{
+    --navy:#1e2a4a; --navy-2:#2b3a63; --bg:#eef0f8; --card:#fff;
+    --ink:#1b1f2a; --muted:#5b6475; --ok:#1f8f4e; --bad:#d93025; --warn:#b26a00;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
+
+  /* ===== Layar umum ===== */
+  .screen{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:var(--card);width:100%;max-width:520px;border-radius:16px;padding:24px 22px;
+    box-shadow:0 6px 24px rgba(30,42,74,.12)}
+  .school{margin:0 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  h1{margin:0 0 14px;font-size:22px;line-height:1.25}
+  h2{margin:0 0 10px;font-size:20px}
+  .rules{margin:0 0 16px;padding-left:20px;line-height:1.55;font-size:15px}
+  .rules li{margin-bottom:6px}
+  .note{font-size:14px;line-height:1.5;padding:10px 12px;border-radius:10px;margin:0 0 14px;
+    background:#eef3ff;color:#23407a}
+  .note.warn{background:#fff4e0;color:var(--warn)}
+  .btn{appearance:none;border:0;border-radius:12px;font-size:16px;font-weight:600;padding:14px 18px;
+    width:100%;cursor:pointer}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{background:var(--navy);color:#fff}
+  .btn.danger{background:var(--bad);color:#fff}
+  .btn.ghost{background:#e6e9f3;color:var(--ink)}
+  .row{display:flex;gap:10px}
+  .row .btn{flex:1}
+
+  /* ===== Input NIS ===== */
+  .field{margin:0 0 14px}
+  .field label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+  .field input{width:100%;font-size:24px;letter-spacing:.35em;text-align:center;padding:12px;
+    border:2px solid #c9cfe0;border-radius:12px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums}
+  .field input:focus{outline:none;border-color:var(--navy)}
+  .field input:read-only{background:#f1f3f9;color:var(--muted)}
+  .field .err{margin:6px 0 0;font-size:13px;color:var(--bad)}
+  .field .help{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+  /* ===== Layar ujian ===== */
+  #screen-exam{display:flex;flex-direction:column;height:100vh;height:100dvh;background:#fff}
+  .bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:var(--navy);color:#fff;padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));
+    min-height:46px}
+  .bar .title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  .badge{font-size:13px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--navy-2);white-space:nowrap}
+  .badge.bad{background:var(--bad)}
+  .bar .finish{appearance:none;border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;
+    font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;cursor:pointer}
+  .hint{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:#fff4e0;color:var(--warn);
+    font-size:12.5px;line-height:1.4;padding:6px 10px}
+  .hint button{margin-left:auto;appearance:none;border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer}
+  #formFrame{flex:1 1 auto;width:100%;border:0;background:#fff}
+
+  /* ===== Overlay ===== */
+  .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:rgba(20,10,10,.92)}
+  .overlay.soft{background:rgba(20,26,45,.75)}
+  .ov-card{background:#fff;width:100%;max-width:440px;border-radius:16px;padding:24px 22px;text-align:center}
+  .icon{width:56px;height:56px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;
+    font-size:30px;font-weight:800;color:#fff;background:var(--bad)}
+  .ov-card h2{color:var(--bad)}
+  .ov-card p{margin:0 0 10px;line-height:1.5;font-size:15px}
+  .big{font-size:34px;font-weight:800;color:var(--bad);line-height:1;margin:6px 0 2px}
+  .meta{font-size:13px;color:var(--muted)}
+  .ov-card .btn{margin-top:10px}
+
+  /* ===== Ringkasan ===== */
+  .sum-count{font-size:44px;font-weight:800;line-height:1;margin:4px 0}
+  .sum-count.ok{color:var(--ok)} .sum-count.bad{color:var(--bad)}
+  .sync{font-size:13px;line-height:1.4;padding:8px 10px;border-radius:10px;margin:12px 0 0;background:#eef3ff;color:#23407a}
+  .log{list-style:none;margin:12px 0 0;padding:0;font-size:14px;text-align:left;max-height:40vh;overflow:auto}
+  .log li{padding:8px 0;border-top:1px solid #e6e9f3;line-height:1.4}
+  .log .t{color:var(--muted);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<noscript>
+  <div class="screen"><div class="card"><h2>JavaScript diperlukan</h2>
+  <p>Aktifkan JavaScript di browser Anda lalu muat ulang halaman ini.</p></div></div>
+</noscript>
+
+<!-- ============ LAYAR AWAL ============ -->
+<section id="screen-start" class="screen">
+  <div class="card">
+    <p class="school">SMK Negeri Bansari</p>
+    <h1>Foreign Language Assignment (FORLAS)</h1>
+    <ol class="rules">
+      <li>Pastikan HP sudah <b>login akun Google</b> di Chrome dan <b>bukan mode Incognito</b>.</li>
+      <li>Setelah menekan <b>Mulai Ujian</b>, layar akan masuk mode layar penuh.</li>
+      <li>Selama ujian, <b>dilarang</b> berpindah tab, membuka aplikasi lain, membuka notifikasi, atau keluar dari layar penuh.</li>
+      <li>Setiap kejadian tersebut <b>tercatat otomatis</b> beserta NIS, waktu, dan jumlahnya.</li>
+      <li>Tekan <b>Selesai</b> hanya setelah jawaban berhasil dikirim.</li>
+    </ol>
+
+    <div class="field">
+      <label for="nis">NIS (4 digit angka)</label>
+      <input id="nis" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4"
+             autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="0000">
+      <p id="nisErr" class="err" hidden>NIS harus tepat 4 digit angka.</p>
+      <p id="nisHelp" class="help">Periksa kembali, NIS tidak dapat diubah setelah ujian dimulai.</p>
+    </div>
+
+    <div id="resumeNote" class="note warn" hidden></div>
+    <div id="fsNote" class="note" hidden></div>
+    <div id="logNote" class="note warn" hidden></div>
+    <button id="btnStart" class="btn primary" type="button" disabled>Mulai Ujian</button>
+  </div>
+</section>
+
+<!-- ============ LAYAR UJIAN ============ -->
+<section id="screen-exam" hidden>
+  <header class="bar">
+    <span id="barTitle" class="title">FORLAS</span>
+    <span id="badge" class="badge">Pelanggaran: <span id="badgeNum">0</span></span>
+    <button id="btnFinish" class="finish" type="button">Selesai</button>
+  </header>
+  <div id="hint" class="hint">
+    <span>Form tidak tampil atau meminta login? Tutup halaman, login Google di Chrome, lalu buka link lagi.</span>
+    <button id="btnHint" type="button" aria-label="Tutup petunjuk">&times;</button>
+  </div>
+  <iframe id="formFrame" title="Form ujian"
+          allow="autoplay; fullscreen; encrypted-media"
+          referrerpolicy="origin"></iframe>
+</section>
+
+<!-- ============ OVERLAY PERINGATAN ============ -->
+<div id="overlay" class="overlay" role="alertdialog" aria-modal="true" hidden>
+  <div class="ov-card">
+    <div class="icon">!</div>
+    <h2>Terdeteksi keluar dari halaman ujian</h2>
+    <p id="ovReason"></p>
+    <div class="big" id="ovCount">0</div>
+    <p class="meta">kali terdeteksi &middot; kejadian terakhir pukul <span id="ovTime"></span></p>
+    <p>Kejadian ini sudah tercatat. Kembali ke ujian dan jangan ulangi.</p>
+    <button id="btnBack" class="btn danger" type="button">Kembali ke Ujian</button>
+  </div>
+</div>
+
+<!-- ============ KONFIRMASI SELESAI ============ -->
+<div id="confirm" class="overlay soft" role="dialog" aria-modal="true" hidden>
+  <div class="ov-card">
+    <h2 style="color:var(--ink)">Akhiri ujian?</h2>
+    <p>Pastikan halaman sudah menampilkan pesan bahwa <b>jawaban Anda telah direkam</b>. Setelah diakhiri, form ditutup.</p>
+    <div class="row">
+      <button id="btnCancel" class="btn ghost" type="button">Batal</button>
+      <button id="btnYes" class="btn primary" type="button">Ya, Selesai</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LAYAR SELESAI ============ -->
+<section id="screen-done" class="screen" hidden>
+  <div class="card" style="text-align:center">
+    <p class="school">SMK Negeri Bansari &middot; NIS <span id="sumNis"></span></p>
+    <h2 style="color:var(--ink)">Ujian ditutup</h2>
+    <p class="meta">Dugaan pelanggaran selama ujian</p>
+    <div id="sumCount" class="sum-count">0</div>
+    <ul id="sumLog" class="log"></ul>
+    <div id="sync" class="sync"></div>
+    <p class="meta" style="margin-top:14px">Layar ini boleh diperlihatkan kepada guru.</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= KONFIGURASI ================= */
+  var CONFIG = {
+    // ID form diambil dari tautan asli: https://forms.gle/rLuaH8EgfRoeMw1o9
+    FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLSfrnCebnUKhth9-gkCKaqLQ6StxJPBhALDCXGtjAO7TIwGWBQ/viewform?embedded=true',
+
+    // Isi setelah GAS di-deploy (URL web app berakhiran /exec) dan kunci yang sama dengan Code.gs
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxBQ-cQ_uXSdMUL2crLeFm7RMLKf_8Vp4o8EGO6NgoO-jv2wU1efPk8RryF9fD9yvUxhw/exec',
+    GAS_KEY: 'keylock1234',
+
+    STORAGE_KEY: 'forlas_session_v2',
+    QUEUE_KEY: 'forlas_queue_v1',
+    SESSION_TTL_H: 12,      // sesi lebih tua dari ini dianggap ujian baru
+    POLL_MS: 500,           // interval pengecekan fokus halaman
+    LOST_FOCUS_MS: 800,     // fokus harus hilang selama ini sebelum dihitung
+    GRACE_MS: 1500,         // jeda abaikan setelah mulai / kembali dari peringatan
+    FLUSH_MS: 20000         // kirim ulang antrean secara berkala
+  };
+
+  var loggingOn = /^https:\/\/script\.google\.com\/.+\/exec$/.test(CONFIG.GAS_URL);
+
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+  var fsSupported = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+
+  var state = { monitoring: false, away: false, graceUntil: 0, lostMs: 0, wasFS: false, wake: null };
+  var session = loadSession();
+
+  /* ================= PENYIMPANAN ================= */
+  function loadSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY));
+      if (s && typeof s === 'object' && Array.isArray(s.violations)) return s;
+    } catch (e) {}
+    return null;
+  }
+  function saveSession() {
+    try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(session)); } catch (e) {}
+  }
+
+  /* ================= UTILITAS ================= */
+  function two(n) { return n < 10 ? '0' + n : '' + n; }
+  function clock(ts) { var d = new Date(ts); return two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); }
+  function dur(ms) {
+    var s = Math.round(ms / 1000);
+    return s < 60 ? s + ' dtk' : Math.floor(s / 60) + ' mnt ' + (s % 60) + ' dtk';
+  }
+  function count() { return session ? session.violations.length : 0; }
+  function last() { return count() ? session.violations[count() - 1] : null; }
+  function updateBadge() {
+    $('badgeNum').textContent = count();
+    $('badge').classList.toggle('bad', count() > 0);
+  }
+  function isResumable() {
+    return !!(session && session.active && session.nis &&
+      (Date.now() - session.startedAt) < CONFIG.SESSION_TTL_H * 3600000);
+  }
+
+  /* ================= PENCATATAN KE SERVER (GAS) ================= */
+  var queue = loadQueue();
+  var net = { busy: false, fails: 0, timer: null, noCors: false, fatal: '' };
+
+  function loadQueue() {
+    try {
+      var q = JSON.parse(localStorage.getItem(CONFIG.QUEUE_KEY));
+      if (Array.isArray(q)) return q;
+    } catch (e) {}
+    return [];
+  }
+  function saveQueue() {
+    try { localStorage.setItem(CONFIG.QUEUE_KEY, JSON.stringify(queue)); } catch (e) {}
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+
+  function logEvent(type, extra) {
+    if (!loggingOn || !session) return;
+    var ev = {
+      id: uid(),
+      t: new Date().toISOString(),
+      nis: session.nis,
+      sid: String(session.startedAt),
+      type: type,
+      n: count(),
+      ua: (navigator.userAgent || '').slice(0, 160)
+    };
+    if (extra) { for (var k in extra) ev[k] = extra[k]; }
+    queue.push(ev);
+    saveQueue();
+    updateSync();
+    flush();
+  }
+
+  function dropIds(ids) {
+    queue = queue.filter(function (e) { return ids.indexOf(e.id) === -1; });
+    saveQueue();
+  }
+
+  function flush() {
+    if (!loggingOn || net.busy || !queue.length) return;
+    if (navigator.onLine === false) return;
+    net.busy = true;
+
+    var batch = queue.slice(0, 20);
+    var ids = batch.map(function (e) { return e.id; });
+    var opts = {
+      method: 'POST',
+      body: JSON.stringify({ key: CONFIG.GAS_KEY, events: batch }),
+      redirect: 'follow'
+    };
+    if (net.noCors) opts.mode = 'no-cors';
+
+    fetch(CONFIG.GAS_URL, opts)
+      .then(function (r) { return net.noCors ? { ok: true } : r.json(); })
+      .then(function (res) {
+        if (res && res.ok) { dropIds(ids); net.fails = 0; net.fatal = ''; }
+        else if (res && res.fatal) { dropIds(ids); net.fatal = res.error || 'ditolak'; }
+        else { throw new Error('server'); }
+      })
+      .catch(function () {
+        net.fails++;
+        // Respons tidak bisa dibaca padahal online: pakai mode tanpa konfirmasi.
+        // Server membuang duplikat berdasarkan id, jadi kirim ulang aman.
+        if (net.fails >= 3 && !net.noCors && navigator.onLine !== false) net.noCors = true;
+      })
+      .then(function () {
+        net.busy = false;
+        updateSync();
+        schedule();
+      });
+  }
+
+  function schedule() {
+    if (!queue.length || net.timer) return;
+    var d = net.fails ? Math.min(30000, 1000 * Math.pow(2, net.fails)) : 300;
+    net.timer = setTimeout(function () { net.timer = null; flush(); }, d);
+  }
+
+  function syncText() {
+    if (!loggingOn) return 'Pencatatan ke server belum diaktifkan di halaman ini.';
+    if (net.fatal) return 'Server menolak data (' + net.fatal + '). Hubungi guru.';
+    if (queue.length) return 'Mengirim data ke server\u2026 (' + queue.length + ' tersisa). Jangan tutup halaman.';
+    return net.noCors ? 'Data terkirim (tanpa konfirmasi server).' : 'Data tercatat di server \u2713';
+  }
+  function updateSync() {
+    var el = $('sync');
+    if (el) el.textContent = syncText();
+  }
+
+  setInterval(flush, CONFIG.FLUSH_MS);
+  window.addEventListener('online', flush);
+
+  /* ================= LAYAR PENUH & WAKE LOCK ================= */
+  function inFS() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function enterFS() {
+    try {
+      var p = root.requestFullscreen ? root.requestFullscreen() : root.webkitRequestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  function exitFS() {
+    try {
+      if (inFS()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } catch (e) {}
+  }
+  function getWake() {
+    try {
+      if ('wakeLock' in navigator) {
+        navigator.wakeLock.request('screen').then(function (l) { state.wake = l; }).catch(function () {});
+      }
+    } catch (e) {}
+  }
+  function releaseWake() {
+    try { if (state.wake) state.wake.release(); } catch (e) {}
+    state.wake = null;
+  }
+
+  /* ================= PENCATATAN PELANGGARAN ================= */
+  function renderOverlay() {
+    var v = last();
+    if (!v) return;
+    $('ovCount').textContent = count();
+    $('ovReason').textContent = v.reason;
+    $('ovTime').textContent = clock(v.t);
+  }
+
+  function addReason(reason) {
+    var v = last();
+    if (v && v.reason.indexOf(reason) === -1) {
+      v.reason += ' + ' + reason;
+      saveSession();
+      renderOverlay();
+    }
+  }
+
+  function trigger(reason) {
+    if (!state.monitoring) return;
+    if (Date.now() < state.graceUntil) return;
+    if (state.away) { addReason(reason); return; }   // satu kejadian = satu hitungan
+    state.away = true;
+    session.violations.push({ t: Date.now(), reason: reason, dur: null });
+    saveSession();
+    updateBadge();
+    renderOverlay();
+    $('overlay').hidden = false;
+    logEvent('pelanggaran', { reason: reason });
+  }
+
+  /* ================= DETEKSI ================= */
+  // 1. Pindah tab / aplikasi / layar terkunci
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      trigger('Pindah tab / aplikasi lain / layar terkunci');
+    } else {
+      if (state.monitoring) getWake();
+      flush();
+    }
+  });
+
+  // 2. Halaman ditinggalkan / ditutup
+  window.addEventListener('pagehide', function () {
+    trigger('Halaman ditinggalkan');
+  });
+
+  // 3. Keluar dari layar penuh (hanya dihitung setelah pernah masuk layar penuh)
+  function onFSChange() {
+    if (inFS()) { state.wasFS = true; return; }
+    if (state.wasFS) trigger('Keluar dari mode layar penuh');
+  }
+  document.addEventListener('fullscreenchange', onFSChange);
+  document.addEventListener('webkitfullscreenchange', onFSChange);
+
+  // 4. Fokus halaman hilang (notifikasi, jendela mengambang, aplikasi lain).
+  //    document.hasFocus() tetap true saat siswa mengetuk isi form (iframe),
+  //    sehingga tidak salah hitung ketika mengisi jawaban.
+  setInterval(function () {
+    if (!state.monitoring || state.away || Date.now() < state.graceUntil) { state.lostMs = 0; return; }
+    if (!document.hasFocus()) {
+      state.lostMs += CONFIG.POLL_MS;
+      if (state.lostMs >= CONFIG.LOST_FOCUS_MS) {
+        state.lostMs = 0;
+        trigger('Fokus halaman hilang (notifikasi / jendela / aplikasi lain)');
+      }
+    } else {
+      state.lostMs = 0;
+    }
+  }, CONFIG.POLL_MS);
+
+  // Pencegahan ringan
+  document.addEventListener('contextmenu', function (e) { if (state.monitoring) e.preventDefault(); });
+  window.addEventListener('beforeunload', function (e) {
+    if (state.monitoring) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ================= NIS ================= */
+  var nisInput = $('nis');
+  function nisValid() { return /^\d{4}$/.test(nisInput.value); }
+  function validateNis() {
+    $('btnStart').disabled = !nisValid();
+    $('nisErr').hidden = nisInput.value.length === 0 || nisValid();
+  }
+  nisInput.addEventListener('input', function () {
+    nisInput.value = nisInput.value.replace(/\D/g, '').slice(0, 4);
+    validateNis();
+  });
+
+  /* ================= ALUR ================= */
+  function startExam() {
+    var now = Date.now();
+    var resume = isResumable();
+
+    if (resume) {
+      session.violations.push({ t: now, reason: 'Halaman dimuat ulang / dibuka kembali', dur: null });
+    } else {
+      if (!nisValid()) return;
+      session = { active: true, startedAt: now, nis: nisInput.value, violations: [] };
+    }
+    saveSession();
+    updateBadge();
+    $('barTitle').textContent = 'FORLAS \u00b7 NIS ' + session.nis;
+
+    $('screen-start').hidden = true;
+    $('screen-exam').hidden = false;
+    $('formFrame').src = CONFIG.FORM_URL;
+
+    if (fsSupported) enterFS();
+    getWake();
+
+    state.graceUntil = now + CONFIG.GRACE_MS + 500;
+    state.away = false;
+    state.monitoring = true;
+
+    if (resume) logEvent('pelanggaran', { reason: last().reason });
+    else logEvent('mulai');
+  }
+
+  function backToExam() {
+    var v = last();
+    if (v && v.dur === null) {
+      v.dur = Date.now() - v.t;
+      saveSession();
+      logEvent('kembali', { reason: v.reason, dur: Math.round(v.dur / 1000) });
+    }
+    state.graceUntil = Date.now() + CONFIG.GRACE_MS;
+    state.lostMs = 0;
+    state.away = false;
+    $('overlay').hidden = true;
+    if (fsSupported && !inFS()) enterFS();
+    getWake();
+  }
+
+  function finishExam() {
+    state.monitoring = false;
+    session.active = false;
+    session.endedAt = Date.now();
+    saveSession();
+    logEvent('selesai');
+
+    $('confirm').hidden = true;
+    $('overlay').hidden = true;
+    exitFS();
+    releaseWake();
+    $('formFrame').src = 'about:blank';
+
+    var n = count();
+    var sc = $('sumCount');
+    sc.textContent = n;
+    sc.className = 'sum-count ' + (n === 0 ? 'ok' : 'bad');
+    $('sumNis').textContent = session.nis;
+    var ul = $('sumLog');
+    ul.textContent = '';
+    session.violations.forEach(function (v, i) {
+      var li = document.createElement('li');
+      var t = document.createElement('span');
+      t.className = 't';
+      t.textContent = (i + 1) + '. ' + clock(v.t) + ' \u2014 ';
+      li.appendChild(t);
+      li.appendChild(document.createTextNode(v.reason + (v.dur ? ' (' + dur(v.dur) + ')' : '')));
+      ul.appendChild(li);
+    });
+    updateSync();
+
+    $('screen-exam').hidden = true;
+    $('screen-done').hidden = false;
+  }
+
+  /* ================= TOMBOL ================= */
+  $('btnStart').addEventListener('click', startExam);
+  $('btnBack').addEventListener('click', backToExam);
+  $('btnFinish').addEventListener('click', function () { $('confirm').hidden = false; });
+  $('btnCancel').addEventListener('click', function () { $('confirm').hidden = true; });
+  $('btnYes').addEventListener('click', finishExam);
+  $('btnHint').addEventListener('click', function () { $('hint').hidden = true; });
+
+  /* ================= TAMPILAN AWAL ================= */
+  (function initStart() {
+    if (isResumable()) {
+      nisInput.value = session.nis;
+      nisInput.readOnly = true;
+      $('nisHelp').hidden = true;
+      $('resumeNote').hidden = false;
+      $('resumeNote').textContent =
+        'Sesi ujian sebelumnya di perangkat ini belum ditutup (pelanggaran tercatat: ' + count() +
+        '). Melanjutkan akan dihitung sebagai 1 pelanggaran tambahan karena halaman dimuat ulang.';
+      $('btnStart').textContent = 'Lanjutkan Ujian';
+    }
+    validateNis();
+
+    if (!fsSupported) {
+      $('fsNote').hidden = false;
+      $('fsNote').textContent =
+        'Perangkat/browser ini tidak mendukung layar penuh otomatis (umum di iPhone). Ujian tetap bisa dikerjakan; ' +
+        'pindah tab atau aplikasi tetap terdeteksi. Di iPhone: Bagikan \u2192 Tambah ke Layar Utama, lalu buka dari ikon agar tanpa bilah browser.';
+    }
+    if (!loggingOn) {
+      $('logNote').hidden = false;
+      $('logNote').textContent =
+        'Pencatatan ke server belum diaktifkan (GAS_URL belum diisi). Pelanggaran hanya dihitung di perangkat ini.';
+    }
+
+    // Kirim sisa antrean dari sesi sebelumnya (jika ada)
+    flush();
+  })();
+})();
+</script>
+</body>
+</html>
